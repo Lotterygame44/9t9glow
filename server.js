@@ -7,49 +7,39 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Static files (index.html, etc.) ke liye
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME LOGIC VARIABLES
-let timer = 180; // 3 Minutes (180 Seconds)
-let lastWinnerNumber = null;
+// 🎰 GAME SETTINGS
+let timer = 60; // 1 Minute = 60 Seconds
+let winningNumber = null;
 
-// 🕒 GLOBAL TIMER (Har 1 second mein chalega)
+// 🕒 SERVER TIMER LOGIC
 setInterval(() => {
     timer--;
 
     if (timer < 0) {
-        // 🏆 WINNER SELECTION (Timer khatam hote hi)
-        lastWinnerNumber = Math.floor(Math.random() * 100) + 1;
+        // 🏆 Winner Choose Karo (1-100)
+        winningNumber = Math.floor(Math.random() * 100) + 1;
         
-        // Sabhi users ko result bhejo
+        // Sabko Result Bhejo
         io.emit('gameResult', { 
-            number: lastWinnerNumber,
-            message: "Round Ended! New Round Starting..."
+            number: winningNumber,
+            message: "Round Ended!" 
         });
 
-        // Timer reset karo 3 minute par
-        timer = 180; 
+        // Timer Reset to 1 minute
+        timer = 60; 
     }
 
-    // Sabhi users ko current time bhejo
+    // Har second timer update bhejo
     io.emit('timer', timer);
 }, 1000);
 
-// User Connect hone par
 io.on('connection', (socket) => {
-    console.log('A user connected');
-    
-    // Naye user ko turant current timer bhej do
-    socket.emit('timer', timer);
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+    socket.emit('timer', timer); // Naye bande ko current time dikhao
 });
 
-// Render ya Local port handle karo
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
