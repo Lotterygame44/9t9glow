@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9t9glow - Pro Tiered Jackpot</title>
+    <title>9t9glow - Elite Tiered Jackpot</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: white; text-align: center; margin: 0; padding: 10px; }
         .card { background: #1c2128; padding: 20px; border-radius: 15px; border: 1px solid #30363d; max-width: 450px; margin: auto; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         
-        /* 🏆 PRIZE TABLE */
-        .prize-table { background: rgba(242, 169, 0, 0.1); border: 1px solid #f2a900; border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 12px; }
-        .prize-row { display: flex; justify-content: space-between; padding: 2px 5px; }
+        .prize-table { background: rgba(242, 169, 0, 0.05); border: 1px solid #444; border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 12px; }
+        .prize-row { display: flex; justify-content: space-between; padding: 3px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .prize-row.no-win { color: #888; text-decoration: line-through; }
         
         #timer { font-size: 60px; font-weight: bold; color: #f2a900; }
         .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; background: #0d1117; padding: 10px; border-radius: 10px; }
         .num-btn { background: #21262d; border: 1px solid #30363d; color: white; padding: 15px 0; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
-        .num-btn.selected { background: #f2a900 !important; color: black !important; }
+        .num-btn.selected { background: #f2a900 !important; color: black !important; border-color: white; }
         .num-btn:disabled { opacity: 0.3; }
 
         #result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 999; display: none; }
@@ -23,22 +23,23 @@
         .lucky-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 15px 0; }
         .lucky-ball { background: black; color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; }
         
-        .btn-confirm { background: #44ff44; color: black; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 16px; margin-top: 15px; cursor: pointer; }
-        .btn-confirm:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .btn-confirm { background: #44ff44; color: black; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 16px; margin-top: 15px; cursor: pointer; transition: 0.3s; }
+        .btn-confirm:disabled { background: #333; color: #666; cursor: not-allowed; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div id="login-container" class="card">
-        <h1 style="color:#f2a900; font-size: 40px; margin: 10px 0;">9t9glow</h1>
-        <p>Jackpot Arena - Login to Play</p>
-        <button onclick="googleLogin()" style="padding:15px; width:100%; cursor:pointer; font-weight:bold; border-radius:10px; border:none;">Sign in with Google</button>
+        <h1 style="color:#f2a900;">9t9glow</h1>
+        <p>Sundernagar's Professional Arena</p>
+        <button onclick="googleLogin()" style="padding:15px; width:100%; cursor:pointer; font-weight:bold; border-radius:10px; border:none; background:white; color:black;">Sign in with Google</button>
     </div>
 
     <div id="game-container" class="card hidden">
         <div class="prize-table">
-            <div style="font-weight:bold; border-bottom:1px solid #f2a900; margin-bottom:5px;">🏆 PRIZE LIST (Entry: 10 Coins)</div>
+            <div style="font-weight:bold; color:#f2a900; margin-bottom:5px; border-bottom:1px solid #333;">🏆 WINNING TIERS (Entry: 10 Coins)</div>
+            <div class="prize-row no-win"><span>0-2 Matches:</span> <span>0 Coins</span></div>
             <div class="prize-row"><span>3 Matches:</span> <span>30 Coins</span></div>
             <div class="prize-row"><span>4 Matches:</span> <span>125 Coins</span></div>
             <div class="prize-row"><span>5 Matches:</span> <span>2500 Coins</span></div>
@@ -47,29 +48,29 @@
 
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="display:flex; align-items:center; gap:8px;">
-                <img id="user-photo" src="" width="30" style="border-radius:50%;">
-                <span id="user-name" style="font-size:12px;"></span>
+                <img id="user-photo" src="" width="30" style="border-radius:50%; border:1px solid #f2a900;">
+                <span id="user-name" style="font-size:12px; font-weight:bold;"></span>
             </div>
             <div style="color:#44ff44; font-weight:bold;"><span id="wallet-balance">1000</span> Coins</div>
         </div>
 
         <div id="timer">01:00</div>
-        <p id="status" style="color:#f2a900; font-weight:bold;">Select Exactly 6 Numbers</p>
+        <p id="status" style="color:#f2a900; font-weight:bold;">Pick Exactly 6 Numbers</p>
 
         <div class="grid-container" id="numbers-grid"></div>
 
         <button id="confirm-bet-btn" class="btn-confirm" onclick="placeTicket()" disabled>Confirm Ticket (10 Coins)</button>
         
-        <button onclick="logout()" style="margin-top:15px; color:#ff4444; background:none; border:none; cursor:pointer; font-size:11px;">Logout</button>
+        <button onclick="logout()" style="margin-top:15px; color:#ff4444; background:none; border:none; cursor:pointer; font-size:11px; opacity:0.6;">Logout System</button>
     </div>
 
     <div id="result-overlay">
         <div class="result-box">
-            <h2 style="margin:0;">6 LUCKY BALLS</h2>
+            <h2 style="margin:0;">LUCKY NUMBERS</h2>
             <div class="lucky-row" id="winning-nums-display"></div>
-            <h1 id="result-title" style="font-size: 30px; margin: 5px 0;">--</h1>
+            <h1 id="result-title" style="font-size: 32px; margin: 5px 0;">--</h1>
             <p id="result-msg" style="font-weight:bold; font-size:18px;"></p>
-            <p id="all-winners" style="font-size:12px; margin-top:5px;"></p>
+            <p id="all-winners" style="font-size:12px; margin-top:5px; color:#222;"></p>
             <button onclick="closeResult()" style="background:black; color:white; border:none; padding:12px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:10px;">Play Next Round</button>
         </div>
     </div>
@@ -100,7 +101,6 @@
         window.logout = () => signOut(auth);
         window.closeResult = () => document.getElementById('result-overlay').style.display = 'none';
 
-        // 🎰 1-25 Grid
         const grid = document.getElementById('numbers-grid');
         for(let i=1; i<=25; i++){
             const b = document.createElement('button');
@@ -116,18 +116,18 @@
                     b.classList.add('selected');
                 }
                 document.getElementById('confirm-bet-btn').disabled = (selectedNums.length !== 6);
-                document.getElementById('status').innerText = `Picks: ${selectedNums.length}/6`;
+                document.getElementById('status').innerText = `Selection: ${selectedNums.length}/6`;
             };
             grid.appendChild(b);
         }
 
         window.placeTicket = () => {
-            if(wallet < 10) return alert("Bhai, coins khatam ho gaye!");
+            if(wallet < 10) return alert("Bhai, Coins khatam ho gaye!");
             wallet -= 10;
             document.getElementById('wallet-balance').innerText = wallet;
             betPlaced = true;
             document.getElementById('confirm-bet-btn').disabled = true;
-            document.getElementById('confirm-bet-btn').innerText = "Ticket Confirmed! ✅";
+            document.getElementById('confirm-bet-btn').innerText = "✅ TICKET CONFIRMED";
             socket.emit('placeBet', { name: myName, numbers: selectedNums });
         };
 
@@ -136,6 +136,7 @@
             if(sec <= 10) {
                 document.querySelectorAll('.num-btn').forEach(btn => btn.disabled = true);
                 document.getElementById('confirm-bet-btn').disabled = true;
+                if(!betPlaced) document.getElementById('status').innerText = "Betting Closed";
             } else if(!betPlaced) {
                 document.querySelectorAll('.num-btn').forEach(btn => btn.disabled = false);
             }
@@ -155,16 +156,21 @@
             else if(matches === 6) prize = 8000;
 
             if(betPlaced && prize > 0) {
-                document.getElementById('result-title').innerText = "🏆 YOU WON!";
-                document.getElementById('result-msg').innerText = `${matches} Matches! +${prize} Coins Added.`;
+                document.getElementById('result-title').innerText = "🏆 WINNER!";
+                document.getElementById('result-msg').innerText = `${matches} Matches Found! +${prize} Coins Added.`;
                 wallet += prize;
                 document.getElementById('wallet-balance').innerText = wallet;
             } else {
-                document.getElementById('result-title').innerText = prize > 0 ? "🏆 WINNER!" : "💔 NO LUCK";
-                document.getElementById('result-msg').innerText = betPlaced ? `Better luck next time!` : "You didn't play this round.";
+                document.getElementById('result-title').innerText = matches >= 3 ? "🏆 CHAMPIONS!" : "💔 TRY AGAIN";
+                document.getElementById('result-msg').innerText = betPlaced ? (matches < 3 ? `Matched ${matches}: No Prize Below 3.` : "") : "You didn't play.";
             }
 
-            // Reset
+            if(data.winners.length > 0) {
+                document.getElementById('all-winners').innerText = "Recent Winners: " + data.winners.map(w => w.name).join(", ");
+            } else {
+                document.getElementById('all-winners').innerText = "No winners this round.";
+            }
+
             betPlaced = false;
             selectedNums = [];
             document.querySelectorAll('.num-btn').forEach(btn => {
