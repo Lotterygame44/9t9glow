@@ -9,7 +9,7 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME ENGINE
+// 🎰 GAME ENGINE SETTINGS
 let timer = 60; 
 let currentBets = {}; 
 let totalPlayers = 0;
@@ -17,20 +17,20 @@ let totalPlayers = 0;
 setInterval(() => {
     timer--;
     if (timer < 0) {
-        // 🏆 6 UNIQUE WINNING NUMBERS (1-25)
+        // 🏆 GENERATE 6 UNIQUE WINNING NUMBERS (1-25)
         let winningNumbers = [];
         while(winningNumbers.length < 6) {
             let r = Math.floor(Math.random() * 25) + 1;
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
         
-        // Winner Calculation
+        // Winners check logic
         let winnersList = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
             
-            // Sirf 3 ya usse zyada matches par hi winner list mein naam aayega
+            // 🚨 STRICT RULE: Only 3 or more matches allowed in winner list
             if (matches >= 3) {
                 winnersList.push({ name: currentBets[id].name, matches: matches });
             }
@@ -64,4 +64,5 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Jackpot Engine: 3-6 Match Only Rule Active`));
