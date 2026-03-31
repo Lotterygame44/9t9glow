@@ -3,38 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9t9glow - Professional Login & Game</title>
+    <title>9t9glow - 100 Numbers Jackpot</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: white; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-        .google-btn { background: white; color: #444; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; transition: transform 0.2s; }
-        .google-btn:hover { transform: scale(1.02); background: #f1f1f1; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: white; text-align: center; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 95%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .google-btn { background: white; color: #444; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .hidden { display: none; }
-        #user-photo { border-radius: 50%; margin-bottom: 10px; border: 2px solid #ff9800; }
-        #timer { font-size: 80px; font-weight: bold; color: #ff9800; text-shadow: 0 0 20px rgba(255,152,0,0.5); margin: 20px 0; }
-        .btn-logout { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px; }
-        #status { font-size: 18px; opacity: 0.8; margin-bottom: 20px; }
+        #timer { font-size: 60px; font-weight: bold; color: #ff9800; margin: 10px 0; text-shadow: 0 0 15px rgba(255,152,0,0.4); }
+        .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 20px; max-height: 300px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .num-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 12px 5px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .num-btn:hover { background: #ff9800; color: #000; font-weight: bold; }
+        .num-btn.selected { background: #ff9800; color: #000; border-color: white; transform: scale(1.1); }
+        .btn-logout { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 5px 15px; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 12px; }
+        #status { font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-container" class="card">
-        <h1 style="color: #ff9800; margin-bottom: 10px;">9t9glow</h1>
-        <p style="opacity: 0.8;">Welcome to the Jackpot Arena</p>
+        <h1 style="color: #ff9800; font-size: 40px; margin-bottom: 5px;">9t9glow</h1>
+        <p>Jackpot Arena - Login to Play</p>
         <button class="google-btn" onclick="googleLogin()">
-            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="20"> Continue with Google
+            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="20"> Sign in with Google
         </button>
     </div>
 
     <div id="game-container" class="card hidden">
-        <img id="user-photo" src="" width="60">
-        <h3>Hi, <span id="user-name"></span>!</h3>
-        <div style="font-size: 22px; color: #ff9800; margin-bottom: 10px;">Wallet: ₹1000</div>
-        
-        <div id="timer">30</div>
-        <div id="status">Wait for the next round...</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="user-photo" src="" width="35" style="border-radius: 50%;">
+                <span id="user-name" style="font-size: 14px;"></span>
+            </div>
+            <div style="color: #44ff44; font-weight: bold;">Wallet: ₹1000</div>
+        </div>
 
-        <hr style="opacity: 0.1; margin: 20px 0;">
+        <div id="timer">03:00</div>
+        <div id="status">Wait for next round...</div>
+
+        <div class="grid-container" id="numbers-grid"></div>
+
         <button class="btn-logout" onclick="logout()">Logout</button>
     </div>
 
@@ -43,15 +50,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // TERI ASLI CONFIG (IMAGE SE COPY KI HUI)
+        // 🔑 TERI CORRECTED API KEY
         const firebaseConfig = {
             apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPQzEsw",
             authDomain: "t9glow-6badf.firebaseapp.com",
             projectId: "t9glow-6badf",
             storageBucket: "t9glow-6badf.firebasestorage.app",
             messagingSenderId: "607215632215",
-            appId: "1:607215632215:web:d88b169eaa59a57644c812",
-            measurementId: "G-061RGH339W"
+            appId: "1:607215632215:web:d88b169eaa59a57644c812"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -59,19 +65,23 @@
         const provider = new GoogleAuthProvider();
         const socket = io();
 
-        // 1. Google Login Function
-        window.googleLogin = function() {
-            signInWithPopup(auth, provider).catch((error) => {
-                alert("Login Error: " + error.message);
-            });
-        };
+        window.googleLogin = () => signInWithPopup(auth, provider);
+        window.logout = () => signOut(auth);
 
-        // 2. Logout Function
-        window.logout = function() {
-            signOut(auth);
-        };
+        // 🎰 GENERATE 1-100 BUTTONS
+        const grid = document.getElementById('numbers-grid');
+        for (let i = 1; i <= 100; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'num-btn';
+            btn.innerText = i;
+            btn.onclick = () => {
+                document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                console.log("Selected:", i);
+            };
+            grid.appendChild(btn);
+        }
 
-        // 3. Auth Listener (Login/Logout Detection)
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-container').classList.add('hidden');
@@ -84,17 +94,20 @@
             }
         });
 
-        // 4. Game Timer Logic (Socket.io)
-        socket.on('timer', (time) => {
-            const timerElement = document.getElementById('timer');
-            if (timerElement) timerElement.innerText = time;
+        socket.on('timer', (seconds) => {
+            let mins = Math.floor(seconds / 60);
+            let secs = seconds % 60;
+            document.getElementById('timer').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
-            if (time <= 5) {
+            if (seconds <= 20) {
                 document.getElementById('status').innerText = "Betting Closed!";
                 document.getElementById('status').style.color = "#ff4444";
+                document.querySelectorAll('.num-btn').forEach(b => b.disabled = true);
             } else {
-                document.getElementById('status').innerText = "Place your bets!";
-                document.getElementById('status').style.color = "#44ff44";
+                document.getElementById('status').innerText = "Pick a number 1-100!";
+                document.getElementById('status').style.color = "#ffcc00";
+                document.querySelectorAll('.num-btn').forEach(b => b.disabled = false);
             }
         });
     </script>
