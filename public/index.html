@@ -15,7 +15,16 @@
 </head>
 <body>
 
-    <div id="login-container" class="card">
+    <div id="game-container" class="card hidden">
+    <img id="user-photo" src="" width="60">
+    <h2>Hi, <span id="user-name"></span>!</h2>
+    <div style="font-size: 24px; color: #ff9800; margin: 20px 0;">Wallet: ₹1000</div>
+
+    <div id="timer" style="font-size: 80px; font-weight: bold; color: orange;">30</div>
+    <div id="status">Wait for the next round...</div>
+    <hr style="margin: 20px 0; opacity: 0.2;">
+    <button onclick="logout()" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer;">Logout</button>
+</div>
         <h1 style="color: #ff9800; margin-bottom: 10px;">9t9glow</h1>
         <p style="opacity: 0.8;">Welcome to the Jackpot Arena</p>
         <button class="google-btn" onclick="googleLogin()">
