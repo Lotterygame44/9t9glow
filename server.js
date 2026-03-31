@@ -9,7 +9,7 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME ENGINE VARIABLES
+// 🎰 GAME SETTINGS
 let timer = 60; 
 let currentBets = {}; // { socketId: { name, number } }
 let totalPlayers = 0;
@@ -17,25 +17,30 @@ let totalPlayers = 0;
 setInterval(() => {
     timer--;
     if (timer < 0) {
-        const winningNumber = Math.floor(Math.random() * 100) + 1;
+        // 🏆 6 UNIQUE LUCKY NUMBERS (1 to 25)
+        let luckyNumbers = [];
+        while(luckyNumbers.length < 6) {
+            let r = Math.floor(Math.random() * 25) + 1;
+            if(luckyNumbers.indexOf(r) === -1) luckyNumbers.push(r);
+        }
         
         // Winner Check Logic
-        let winners = [];
+        let winnersList = [];
         for (let id in currentBets) {
-            if (currentBets[id].number === winningNumber) {
-                winners.push(currentBets[id].name);
+            if (luckyNumbers.includes(currentBets[id].number)) {
+                winnersList.push(currentBets[id].name);
             }
         }
 
-        // Result Broadcast
+        // Send Result to All
         io.emit('gameResult', { 
-            number: winningNumber, 
-            winners: winners, 
+            numbers: luckyNumbers, // Array of 6 numbers
+            winners: winnersList, 
             totalBets: Object.keys(currentBets).length 
         });
 
         timer = 60; 
-        currentBets = {}; // Reset for next round
+        currentBets = {}; 
     }
     io.emit('timer', timer);
 }, 1000);
@@ -57,4 +62,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Server live on ${PORT}`));
+server.listen(PORT, () => console.log(`Jackpot Server Live: 1-25 Range | 6 Winners`));
