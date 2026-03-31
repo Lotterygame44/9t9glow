@@ -3,145 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lottery Royale Pro</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title>9t9glow - Professional Login</title>
     <style>
-        /* Professional Dark Theme */
-        body { 
-            background: #0f0c29; 
-            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
-            color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; 
-        }
-        
-        /* Navbar Section */
-        .glass-nav { 
-            background: rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(10px);
-            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255, 165, 0, 0.3);
-        }
-        .user-profile { display: flex; align-items: center; gap: 10px; }
-        .user-pic { width: 40px; height: 40px; border-radius: 50%; border: 2px solid orange; }
-        
-        /* Game Main Area */
-        .game-container { margin-top: 50px; }
-        .timer-circle { 
-            font-size: 60px; font-weight: bold; color: #ff9800; 
-            border: 8px solid #ff9800; width: 130px; height: 130px; 
-            border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; margin: 20px auto;
-            box-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
-        }
-
-        .input-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px; border-radius: 20px; display: inline-block;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        input { 
-            background: #1a1a2e; border: 1px solid orange; color: white; 
-            padding: 15px; border-radius: 10px; width: 150px; font-size: 22px; text-align: center; 
-        }
-        
-        button { 
-            padding: 15px 30px; border-radius: 10px; border: none; 
-            background: linear-gradient(45deg, #ff9800, #f44336); 
-            color: white; font-size: 18px; font-weight: bold; 
-            cursor: pointer; transition: 0.3s; margin-top: 15px;
-        }
-        button:hover { transform: scale(1.05); }
-
-        /* Winners Section */
-        .winners-box {
-            margin-top: 40px; background: rgba(0,0,0,0.3); 
-            padding: 20px; width: 300px; margin-left: auto; margin-right: auto;
-            border-radius: 15px; border-left: 5px solid orange;
-        }
-        .winner-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; }
-        #msg { font-size: 18px; margin-top: 20px; color: #00ffcc; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: white; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 320px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); }
+        .google-btn { background: white; color: #444; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; transition: 0.3s; }
+        .google-btn:hover { background: #f1f1f1; transform: scale(1.02); }
+        .hidden { display: none; }
+        #user-photo { border-radius: 50%; margin-bottom: 10px; border: 2px solid #ff9800; }
     </style>
 </head>
 <body>
 
-    <div class="glass-nav">
-        <div class="user-profile">
-            <img class="user-pic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-            <span id="user-name">Gaurav_Player</span>
-        </div>
-        <div style="font-size: 20px;">💰 Balance: <span id="balance" style="color: #4caf50;">500</span></div>
+    <div id="login-container" class="card">
+        <h1 style="color: #ff9800; margin-bottom: 10px;">9t9glow</h1>
+        <p style="opacity: 0.8;">Welcome to the Jackpot Arena</p>
+        <button class="google-btn" onclick="googleLogin()">
+            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="20"> Continue with Google
+        </button>
     </div>
 
-    <div class="game-container">
-        <div class="timer-circle" id="timer">30</div>
-        
-        <div class="input-card">
-            <p>Pick a number between 1 and 10</p>
-            <input type="number" id="guess" min="1" max="10" placeholder="0"> <br>
-            <button onclick="makeBet()" id="betBtn">Place Bet (10 Coins)</button>
-        </div>
-        
-        <div id="msg">New round starts soon...</div>
+    <div id="game-container" class="card hidden">
+        <img id="user-photo" src="" width="60">
+        <h2>Hi, <span id="user-name"></span>!</h2>
+        <div style="font-size: 24px; color: #ff9800; margin: 20px 0;">Wallet: ₹1000</div>
+        <p>Aapka BCA level jackpot game taiyaar hai!</p>
+        <button onclick="logout()" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">Logout</button>
     </div>
 
-    <div class="winners-box">
-        <h3 style="margin-top:0">🏆 Recent Winners</h3>
-        <div id="winners-list">
-            <div class="winner-item">
-                <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" width="25">
-                <span>Rahul won 100 coins</span>
-            </div>
-        </div>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    <script>
-        const socket = io();
-        let balance = 500;
+        // ✅ TERI KEYS MAINE YAHAN SET KAR DI HAIN
+        const firebaseConfig = {
+          apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPZzEsw",
+          authDomain: "t9glow-6badf.firebaseapp.com",
+          projectId: "t9glow-6badf",
+          storageBucket: "t9glow-6badf.firebasestorage.app",
+          messagingSenderId: "607215632215",
+          appId: "1:607215632215:web:d88b169eaa59a57644c812",
+          measurementId: "G-061RGH339W"
+        };
 
-        socket.on('tick', (t) => {
-            document.getElementById('timer').innerText = t;
-            if (t === 29) {
-                document.getElementById('msg').innerText = "Place your bets!";
-                document.getElementById('betBtn').disabled = false;
-            }
-        });
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
 
-        function makeBet() {
-            const val = document.getElementById('guess').value;
-            if (!val || val < 1 || val > 10) return alert("Enter 1-10!");
-            
-            balance -= 10;
-            document.getElementById('balance').innerText = balance;
-            document.getElementById('betBtn').disabled = true;
-            document.getElementById('msg').innerText = "Bet placed on: " + val;
-            
-            socket.emit('bet', val);
-        }
+        window.googleLogin = function() {
+            signInWithPopup(auth, provider).catch((error) => {
+                alert("Login Error: " + error.message);
+                console.log(error);
+            });
+        };
 
-        socket.on('round_end', (winNum) => {
-            // Hum server se result mangenge
-        });
+        window.logout = function() { signOut(auth); };
 
-        socket.on('result', (res) => {
-            if (res === 'WIN') {
-                balance += 100;
-                document.getElementById('balance').innerText = balance;
-                document.getElementById('msg').innerHTML = "🔥 YOU WON! Check the winner list.";
-                confetti();
-                addWinner("Gaurav_Player", 100);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('game-container').classList.remove('hidden');
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-photo').src = user.photoURL;
             } else {
-                document.getElementById('msg').innerHTML = "❌ Better luck next time!";
+                document.getElementById('login-container').classList.remove('hidden');
+                document.getElementById('game-container').classList.add('hidden');
             }
         });
-
-        function addWinner(name, amount) {
-            const list = document.getElementById('winners-list');
-            const item = document.createElement('div');
-            item.className = 'winner-item';
-            item.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="25"> <span>${name} won ${amount} coins</span>`;
-            list.prepend(item);
-        }
     </script>
 </body>
 </html>
