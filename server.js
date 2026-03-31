@@ -1,68 +1,55 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const mongoose = require('mongoose');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static('public'));
+// Static files (index.html, etc.) ke liye
+app.use(express.static(path.join(__dirname, 'public')));
 
-const DB_URI = "mongodb://9t9glow:QWERASDFZXCV-OO@ac-o4cawd9-shard-00-00.s8c4t4z.mongodb.net:27017,ac-o4cawd9-shard-00-01.s8c4t4z.mongodb.net:27017,ac-o4cawd9-shard-00-02.s8c4t4z.mongodb.net:27017/?ssl=true&replicaSet=atlas-uzabw3-shard-0&authSource=admin&appName=Cluster0";
-mongoose.connect(DB_URI)
-    .then(() => console.log("✅ Database Connected!"))
-    .catch(err => console.log("❌ DB Error:", err));
+// 🎰 GAME LOGIC VARIABLES
+let timer = 180; // 3 Minutes (180 Seconds)
+let lastWinnerNumber = null;
 
-// 📝 PLAYER SCHEMA (Data ka Naksha)
-const playerSchema = new mongoose.Schema({
-    name: { type: String, unique: true },
-    coins: { type: Number, default: 1000 }
-});
-const Player = mongoose.model('Player', playerSchema);
-
-// 🎰 GAME LOGIC
-let timer = 300;
-let winningNumber = Math.floor(Math.random() * 100) + 1;
-
-setInterval(async () => {
+// 🕒 GLOBAL TIMER (Har 1 second mein chalega)
+setInterval(() => {
     timer--;
-    if (timer <= 0) {
-        io.emit('round_ended', { winNum: winningNumber });
-        winningNumber = Math.floor(Math.random() * 100) + 1;
-        timer = 300;
+
+    if (timer < 0) {
+        // 🏆 WINNER SELECTION (Timer khatam hote hi)
+        lastWinnerNumber = Math.floor(Math.random() * 100) + 1;
+        
+        // Sabhi users ko result bhejo
+        io.emit('gameResult', { 
+            number: lastWinnerNumber,
+            message: "Round Ended! New Round Starting..."
+        });
+
+        // Timer reset karo 3 minute par
+        timer = 180; 
     }
-    io.emit('tick', timer);
+
+    // Sabhi users ko current time bhejo
+    io.emit('timer', timer);
 }, 1000);
 
+// User Connect hone par
 io.on('connection', (socket) => {
-    // LOGIN: Database se coins uthao
-    socket.on('login', async (data) => {
-        try {
-            let user = await Player.findOne({ name: data.name });
-            if (!user) {
-                user = new Player({ name: data.name, coins: 1000 });
-                await user.save();
-            }
-            socket.playerName = user.name;
-            socket.emit('update_balance', user.coins);
-            console.log(`👤 ${user.name} logged in with ${user.coins} coins`);
-        } catch (err) { console.log(err); }
-    });
+    console.log('A user connected');
+    
+    // Naye user ko turant current timer bhej do
+    socket.emit('timer', timer);
 
-    // BET: Database mein coins minus karo
-    socket.on('place_bet', async (data) => {
-        try {
-            let user = await Player.findOne({ name: socket.playerName });
-            if (user && user.coins >= 10) {
-                user.coins -= 10;
-                await user.save();
-                socket.emit('update_balance', user.coins);
-                console.log(`💰 ${user.name} bet on ${data.guess}. New Balance: ${user.coins}`);
-            }
-        } catch (err) { console.log(err); }
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
     });
 });
 
+// Render ya Local port handle karo
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Game Live on Port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
