@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const https = require('https'); // For Self-Ping
+const https = require('https'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -10,7 +10,13 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME ENGINE
+// 🛑 KEEP ALIVE LOGIC (Permanent Fix)
+setInterval(() => {
+    https.get('https://ninet9glow.onrender.com', (res) => {
+        console.log('Stay Awake Ping Sent!');
+    }).on('error', (e) => console.log('Ping failed'));
+}, 300000); 
+
 let timer = 60; 
 let currentBets = {}; 
 let activeUsers = {}; 
@@ -23,46 +29,27 @@ setInterval(() => {
             let r = Math.floor(Math.random() * 25) + 1;
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
-        
         let roundResults = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
-            if (matches >= 3) {
-                roundResults.push({ name: currentBets[id].name, matches: matches });
-            }
+            if (matches >= 3) roundResults.push({ name: currentBets[id].name, matches: matches });
         }
-
-        io.emit('gameResult', { 
-            winningNumbers: winningNumbers, 
-            allResults: roundResults 
-        });
-
+        io.emit('gameResult', { winningNumbers: winningNumbers, allResults: roundResults });
         timer = 60; 
         currentBets = {}; 
     }
     io.emit('timer', timer);
 }, 1000);
 
-// 🛡️ SELF-PING LOGIC (Server ko hamesha jagaye rakhega)
-setInterval(() => {
-    https.get('https://ninet9glow.onrender.com', (res) => {
-        console.log('Self-ping: Server stays awake!');
-    }).on('error', (err) => {
-        console.log('Self-ping failed: ' + err.message);
-    });
-}, 300000); // Har 5 minute mein khud ko ping karega
-
 io.on('connection', (socket) => {
     socket.on('joinGame', (userName) => {
         activeUsers[socket.id] = userName;
         io.emit('updateUserList', Object.values(activeUsers));
     });
-
     socket.on('placeBet', (data) => {
         currentBets[socket.id] = { name: data.name, numbers: data.numbers };
     });
-
     socket.on('disconnect', () => {
         delete activeUsers[socket.id];
         delete currentBets[socket.id];
@@ -71,4 +58,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Pro Server Active with Keep-Alive`));
+server.listen(PORT, () => console.log(`9t9glow Live & Awake on Port ${PORT}`));
