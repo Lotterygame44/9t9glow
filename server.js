@@ -9,27 +9,28 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME SETTINGS
+// 🎰 GAME ENGINE
 let timer = 60; 
-let currentBets = {}; // { socketId: { name, numbers: [] } }
+let currentBets = {}; 
 let totalPlayers = 0;
 
 setInterval(() => {
     timer--;
     if (timer < 0) {
-        // 🏆 GENERATE 6 UNIQUE WINNING NUMBERS (1-25)
+        // 🏆 6 UNIQUE WINNING NUMBERS (1-25)
         let winningNumbers = [];
         while(winningNumbers.length < 6) {
             let r = Math.floor(Math.random() * 25) + 1;
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
         
-        // Result calculation
+        // Winner Calculation
         let winnersList = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
             
+            // Sirf 3 ya usse zyada matches par hi winner list mein naam aayega
             if (matches >= 3) {
                 winnersList.push({ name: currentBets[id].name, matches: matches });
             }
@@ -63,5 +64,4 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Server: 10 Coin Entry | Tiered Prizes`));
+const PORT
