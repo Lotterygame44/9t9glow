@@ -9,37 +9,52 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME SETTINGS
-let timer = 60; // 1 Minute = 60 Seconds
-let winningNumber = null;
+// 🎰 GAME ENGINE VARIABLES
+let timer = 60; 
+let currentBets = {}; // { socketId: { name, number } }
+let totalPlayers = 0;
 
-// 🕒 SERVER TIMER LOGIC
 setInterval(() => {
     timer--;
-
     if (timer < 0) {
-        // 🏆 Winner Choose Karo (1-100)
-        winningNumber = Math.floor(Math.random() * 100) + 1;
+        const winningNumber = Math.floor(Math.random() * 100) + 1;
         
-        // Sabko Result Bhejo
+        // Winner Check Logic
+        let winners = [];
+        for (let id in currentBets) {
+            if (currentBets[id].number === winningNumber) {
+                winners.push(currentBets[id].name);
+            }
+        }
+
+        // Result Broadcast
         io.emit('gameResult', { 
-            number: winningNumber,
-            message: "Round Ended!" 
+            number: winningNumber, 
+            winners: winners, 
+            totalBets: Object.keys(currentBets).length 
         });
 
-        // Timer Reset to 1 minute
         timer = 60; 
+        currentBets = {}; // Reset for next round
     }
-
-    // Har second timer update bhejo
     io.emit('timer', timer);
 }, 1000);
 
 io.on('connection', (socket) => {
-    socket.emit('timer', timer); // Naye bande ko current time dikhao
+    totalPlayers++;
+    io.emit('playerCount', totalPlayers);
+
+    socket.on('placeBet', (data) => {
+        currentBets[socket.id] = { name: data.name, number: data.number };
+        io.emit('updateLiveBets', Object.keys(currentBets).length);
+    });
+
+    socket.on('disconnect', () => {
+        totalPlayers--;
+        delete currentBets[socket.id];
+        io.emit('playerCount', totalPlayers);
+    });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Jackpot Server live on ${PORT}`));
