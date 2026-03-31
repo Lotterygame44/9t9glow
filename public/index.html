@@ -27,7 +27,6 @@
         <img id="user-photo" src="" width="60">
         <h2>Hi, <span id="user-name"></span>!</h2>
         <div style="font-size: 24px; color: #ff9800; margin: 20px 0;">Wallet: ₹1000</div>
-        <p>Aapka BCA level jackpot game taiyaar hai!</p>
         <button onclick="logout()" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">Logout</button>
     </div>
 
@@ -35,7 +34,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // ✅ TERI KEYS MAINE YAHAN SET KAR DI HAIN
         const firebaseConfig = {
           apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPZzEsw",
           authDomain: "t9glow-6badf.firebaseapp.com",
@@ -53,7 +51,6 @@
         window.googleLogin = function() {
             signInWithPopup(auth, provider).catch((error) => {
                 alert("Login Error: " + error.message);
-                console.log(error);
             });
         };
 
