@@ -9,10 +9,9 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME SETTINGS
 let timer = 60; 
 let currentBets = {}; 
-let activeUsers = {}; // { socketId: name }
+let activeUsers = {}; 
 
 setInterval(() => {
     timer--;
@@ -61,4 +60,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Pro Server Live on ${PORT}`));
+server.listen(PORT, () => console.log(`Server live on ${PORT}`));
