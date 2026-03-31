@@ -9,25 +9,57 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME ENGINE SETTINGS
+// 🎰 GAME SETTINGS
 let timer = 60; 
-let currentBets = {}; // { socketId: { name, numbers: [] } }
+let currentBets = {}; 
 let totalPlayers = 0;
 
 setInterval(() => {
     timer--;
     if (timer < 0) {
-        // 🏆 GENERATE 6 UNIQUE LUCKY NUMBERS (1-25)
+        // 🏆 6 UNIQUE LUCKY NUMBERS
         let luckyNumbers = [];
         while(luckyNumbers.length < 6) {
             let r = Math.floor(Math.random() * 25) + 1;
             if(!luckyNumbers.includes(r)) luckyNumbers.push(r);
         }
         
-        // Winner Check: Agar user ke 6 picks mein se KOI BHI lucky numbers mein hai
         let winnersList = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const hasMatched = userPicks.some(num => luckyNumbers.includes(num));
-            
             if (hasMatched) {
+                winnersList.push(currentBets[id].name);
+            }
+        }
+
+        io.emit('gameResult', { 
+            winningNumbers: luckyNumbers, 
+            winners: winnersList, 
+            totalBets: Object.keys(currentBets).length 
+        });
+
+        timer = 60; 
+        currentBets = {}; 
+    }
+    io.emit('timer', timer);
+}, 1000);
+
+io.on('connection', (socket) => {
+    totalPlayers++;
+    io.emit('playerCount', totalPlayers);
+
+    socket.on('placeBet', (data) => {
+        currentBets[socket.id] = { name: data.name, numbers: data.numbers };
+        io.emit('updateLiveBets', Object.keys(currentBets).length);
+    });
+
+    socket.on('disconnect', () => {
+        totalPlayers--;
+        delete currentBets[socket.id];
+        io.emit('playerCount', totalPlayers);
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Jackpot Server Live on Port ${PORT}`));
