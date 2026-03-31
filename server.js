@@ -22,18 +22,17 @@ setInterval(() => {
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
         
-        let winnersList = [];
+        // 📊 Sabhi players ka result nikalo (Jeete ya Haare)
+        let roundResults = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
-            if (matches >= 3) {
-                winnersList.push({ name: currentBets[id].name, matches: matches });
-            }
+            roundResults.push({ name: currentBets[id].name, matches: matches });
         }
 
         io.emit('gameResult', { 
             winningNumbers: winningNumbers, 
-            winners: winnersList 
+            allResults: roundResults 
         });
 
         timer = 60; 
@@ -60,4 +59,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server live on ${PORT}`));
+server.listen(PORT, () => console.log(`Jackpot Pro Server Active`));
