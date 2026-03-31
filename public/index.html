@@ -3,28 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9t9glow - Professional Login</title>
+    <title>9t9glow - Professional Login & Game</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: white; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 320px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); }
-        .google-btn { background: white; color: #444; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; transition: 0.3s; }
-        .google-btn:hover { background: #f1f1f1; transform: scale(1.02); }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: white; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .google-btn { background: white; color: #444; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; transition: transform 0.2s; }
+        .google-btn:hover { transform: scale(1.02); background: #f1f1f1; }
         .hidden { display: none; }
         #user-photo { border-radius: 50%; margin-bottom: 10px; border: 2px solid #ff9800; }
+        #timer { font-size: 80px; font-weight: bold; color: #ff9800; text-shadow: 0 0 20px rgba(255,152,0,0.5); margin: 20px 0; }
+        .btn-logout { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+        #status { font-size: 18px; opacity: 0.8; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="game-container" class="card hidden">
-    <img id="user-photo" src="" width="60">
-    <h2>Hi, <span id="user-name"></span>!</h2>
-    <div style="font-size: 24px; color: #ff9800; margin: 20px 0;">Wallet: ₹1000</div>
-
-    <div id="timer" style="font-size: 80px; font-weight: bold; color: orange;">30</div>
-    <div id="status">Wait for the next round...</div>
-    <hr style="margin: 20px 0; opacity: 0.2;">
-    <button onclick="logout()" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer;">Logout</button>
-</div>
+    <div id="login-container" class="card">
         <h1 style="color: #ff9800; margin-bottom: 10px;">9t9glow</h1>
         <p style="opacity: 0.8;">Welcome to the Jackpot Arena</p>
         <button class="google-btn" onclick="googleLogin()">
@@ -34,37 +28,50 @@
 
     <div id="game-container" class="card hidden">
         <img id="user-photo" src="" width="60">
-        <h2>Hi, <span id="user-name"></span>!</h2>
-        <div style="font-size: 24px; color: #ff9800; margin: 20px 0;">Wallet: ₹1000</div>
-        <button onclick="logout()" style="background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 8px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">Logout</button>
+        <h3>Hi, <span id="user-name"></span>!</h3>
+        <div style="font-size: 22px; color: #ff9800; margin-bottom: 10px;">Wallet: ₹1000</div>
+        
+        <div id="timer">30</div>
+        <div id="status">Wait for the next round...</div>
+
+        <hr style="opacity: 0.1; margin: 20px 0;">
+        <button class="btn-logout" onclick="logout()">Logout</button>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // TERI ASLI CONFIG (IMAGE SE COPY KI HUI)
         const firebaseConfig = {
-          apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPQzEsw",
-          authDomain: "t9glow-6badf.firebaseapp.com",
-          projectId: "t9glow-6badf",
-          storageBucket: "t9glow-6badf.firebasestorage.app",
-          messagingSenderId: "607215632215",
-          appId: "1:607215632215:web:d88b169eaa59a57644c812",
-          measurementId: "G-061RGH339W"
+            apiKey: "AIzaSyDvM9pcjS6K60tdA_xV1zVCTt7eZPQzEsw",
+            authDomain: "t9glow-6badf.firebaseapp.com",
+            projectId: "t9glow-6badf",
+            storageBucket: "t9glow-6badf.firebasestorage.app",
+            messagingSenderId: "607215632215",
+            appId: "1:607215632215:web:d88b169eaa59a57644c812",
+            measurementId: "G-061RGH339W"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
+        const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        const socket = io();
 
+        // 1. Google Login Function
         window.googleLogin = function() {
             signInWithPopup(auth, provider).catch((error) => {
                 alert("Login Error: " + error.message);
             });
         };
 
-        window.logout = function() { signOut(auth); };
+        // 2. Logout Function
+        window.logout = function() {
+            signOut(auth);
+        };
 
+        // 3. Auth Listener (Login/Logout Detection)
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-container').classList.add('hidden');
@@ -74,6 +81,20 @@
             } else {
                 document.getElementById('login-container').classList.remove('hidden');
                 document.getElementById('game-container').classList.add('hidden');
+            }
+        });
+
+        // 4. Game Timer Logic (Socket.io)
+        socket.on('timer', (time) => {
+            const timerElement = document.getElementById('timer');
+            if (timerElement) timerElement.innerText = time;
+            
+            if (time <= 5) {
+                document.getElementById('status').innerText = "Betting Closed!";
+                document.getElementById('status').style.color = "#ff4444";
+            } else {
+                document.getElementById('status').innerText = "Place your bets!";
+                document.getElementById('status').style.color = "#44ff44";
             }
         });
     </script>
