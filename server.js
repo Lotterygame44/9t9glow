@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const https = require('https'); // For Self-Ping
 
 const app = express();
 const server = http.createServer(app);
@@ -9,6 +10,7 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 🎰 GAME ENGINE
 let timer = 60; 
 let currentBets = {}; 
 let activeUsers = {}; 
@@ -22,12 +24,13 @@ setInterval(() => {
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
         
-        // 📊 Sabhi players ka result nikalo (Jeete ya Haare)
         let roundResults = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
-            roundResults.push({ name: currentBets[id].name, matches: matches });
+            if (matches >= 3) {
+                roundResults.push({ name: currentBets[id].name, matches: matches });
+            }
         }
 
         io.emit('gameResult', { 
@@ -40,6 +43,15 @@ setInterval(() => {
     }
     io.emit('timer', timer);
 }, 1000);
+
+// 🛡️ SELF-PING LOGIC (Server ko hamesha jagaye rakhega)
+setInterval(() => {
+    https.get('https://ninet9glow.onrender.com', (res) => {
+        console.log('Self-ping: Server stays awake!');
+    }).on('error', (err) => {
+        console.log('Self-ping failed: ' + err.message);
+    });
+}, 300000); // Har 5 minute mein khud ko ping karega
 
 io.on('connection', (socket) => {
     socket.on('joinGame', (userName) => {
@@ -59,4 +71,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Pro Server Active`));
+server.listen(PORT, () => console.log(`Jackpot Pro Server Active with Keep-Alive`));
