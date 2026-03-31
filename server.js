@@ -9,28 +9,24 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🎰 GAME ENGINE SETTINGS
+// 🎰 GAME SETTINGS
 let timer = 60; 
 let currentBets = {}; 
-let totalPlayers = 0;
+let activeUsers = {}; // { socketId: name }
 
 setInterval(() => {
     timer--;
     if (timer < 0) {
-        // 🏆 GENERATE 6 UNIQUE WINNING NUMBERS (1-25)
         let winningNumbers = [];
         while(winningNumbers.length < 6) {
             let r = Math.floor(Math.random() * 25) + 1;
             if(!winningNumbers.includes(r)) winningNumbers.push(r);
         }
         
-        // Winners check logic
         let winnersList = [];
         for (let id in currentBets) {
             const userPicks = currentBets[id].numbers;
             const matches = userPicks.filter(num => winningNumbers.includes(num)).length;
-            
-            // 🚨 STRICT RULE: Only 3 or more matches allowed in winner list
             if (matches >= 3) {
                 winnersList.push({ name: currentBets[id].name, matches: matches });
             }
@@ -38,8 +34,7 @@ setInterval(() => {
 
         io.emit('gameResult', { 
             winningNumbers: winningNumbers, 
-            winners: winnersList, 
-            totalBets: Object.keys(currentBets).length 
+            winners: winnersList 
         });
 
         timer = 60; 
@@ -49,20 +44,21 @@ setInterval(() => {
 }, 1000);
 
 io.on('connection', (socket) => {
-    totalPlayers++;
-    io.emit('playerCount', totalPlayers);
+    socket.on('joinGame', (userName) => {
+        activeUsers[socket.id] = userName;
+        io.emit('updateUserList', Object.values(activeUsers));
+    });
 
     socket.on('placeBet', (data) => {
         currentBets[socket.id] = { name: data.name, numbers: data.numbers };
-        io.emit('updateLiveBets', Object.keys(currentBets).length);
     });
 
     socket.on('disconnect', () => {
-        totalPlayers--;
+        delete activeUsers[socket.id];
         delete currentBets[socket.id];
-        io.emit('playerCount', totalPlayers);
+        io.emit('updateUserList', Object.values(activeUsers));
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Jackpot Engine: 3-6 Match Only Rule Active`));
+server.listen(PORT, () => console.log(`Jackpot Pro Server Live on ${PORT}`));
