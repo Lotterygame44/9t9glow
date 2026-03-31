@@ -3,51 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9t9glow - Pro Jackpot</title>
+    <title>9t9glow - Fast Jackpot</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: white; text-align: center; margin: 0; padding: 10px; }
-        .card { background: #1c2128; padding: 20px; border-radius: 15px; border: 1px solid #30363d; max-width: 450px; margin: auto; }
-        #timer { font-size: 60px; font-weight: bold; color: #f2a900; }
+        .card { background: #1c2128; padding: 20px; border-radius: 15px; border: 1px solid #30363d; max-width: 450px; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #timer { font-size: 70px; font-weight: bold; color: #f2a900; margin: 10px 0; }
         
-        /* 🎰 1-100 GRID */
-        .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 15px; max-height: 250px; overflow-y: auto; padding: 10px; background: #0d1117; border-radius: 10px; }
-        .num-btn { background: #21262d; border: 1px solid #30363d; color: white; padding: 10px 0; border-radius: 5px; cursor: pointer; }
-        .num-btn.selected { background: #f2a900; color: black; font-weight: bold; }
+        /* 🎰 1-100 BUTTONS GRID */
+        .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; max-height: 300px; overflow-y: auto; padding: 10px; background: #0d1117; border-radius: 10px; border: 1px solid #30363d; }
+        .num-btn { background: #21262d; border: 1px solid #30363d; color: white; padding: 12px 0; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        .num-btn:hover:not(:disabled) { background: #30363d; border-color: #f2a900; }
+        .num-btn.selected { background: #f2a900 !important; color: black !important; transform: scale(1.05); }
+        .num-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* 🏆 RESULT POPUP */
-        #result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
-        .result-box { background: #f2a900; color: black; padding: 40px; border-radius: 20px; width: 80%; max-width: 300px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
-        
+        /* 🏆 RESULT OVERLAY */
+        #result-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 999; display: none; }
+        .result-box { background: #f2a900; color: black; padding: 40px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; }
         .hidden { display: none; }
+        .btn-main { background: white; color: black; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div id="login-container" class="card">
-        <h1>9t9glow</h1>
-        <button onclick="googleLogin()" style="padding:15px; width:100%; cursor:pointer;">Sign in with Google</button>
+        <h1 style="color:#f2a900; font-size: 45px; margin: 10px 0;">9t9glow</h1>
+        <p style="opacity:0.7;">Sundernagar's #1 Jackpot Arena</p>
+        <button class="btn-main" onclick="googleLogin()">Sign in with Google</button>
     </div>
 
     <div id="game-container" class="card hidden">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <span id="user-name">Player</span>
-            <span style="color:#44ff44;">Wallet: ₹<span id="wallet-balance">1000</span></span>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img id="user-photo" src="" width="35" style="border-radius:50%;">
+                <span id="user-name" style="font-weight:bold; font-size:14px;">Player</span>
+            </div>
+            <div style="color:#44ff44; font-weight:bold;">₹<span id="wallet-balance">1000</span></div>
         </div>
 
-        <div id="timer">03:00</div>
-        <p id="status">Pick your lucky number!</p>
+        <div id="timer">01:00</div>
+        <p id="status" style="color:#f2a900;">Pick a number 1-100</p>
 
         <div class="grid-container" id="numbers-grid"></div>
-        <button onclick="logout()" style="margin-top:20px; color:red; background:none; border:none; cursor:pointer;">Logout</button>
+        <button onclick="logout()" style="margin-top:20px; color:#ff4444; background:none; border:none; cursor:pointer; font-size:12px;">Logout</button>
     </div>
 
     <div id="result-overlay">
         <div class="result-box">
-            <h2 id="result-title">WINNER!</h2>
-            <h1 id="winning-num-display" style="font-size: 80px; margin: 10px 0;">--</h1>
-            <p id="result-msg">Loading results...</p>
-            <button onclick="closeResult()" style="padding:10px 20px; cursor:pointer; font-weight:bold;">Next Round</button>
+            <h2 id="result-title" style="margin:0;">WINNING NUMBER</h2>
+            <h1 id="winning-num-display" style="font-size: 90px; margin: 10px 0;">--</h1>
+            <p id="result-msg" style="font-weight:bold; font-size:18px;"></p>
+            <button onclick="closeResult()" class="btn-main" style="background:black; color:white;">Play Next Round</button>
         </div>
     </div>
 
@@ -56,8 +61,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+        // 🔑 TERI ASLI API KEY
         const firebaseConfig = {
-            apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPQzEsw", // Teri sahi key
+            apiKey: "AIzaSyDvM9pcjS6K60tdA_xVlzVCTt7eZPQzEsw",
             authDomain: "t9glow-6badf.firebaseapp.com",
             projectId: "t9glow-6badf",
             storageBucket: "t9glow-6badf.firebasestorage.app",
@@ -89,38 +95,40 @@
             grid.appendChild(b);
         }
 
-        // 🕒 Timer & Results
+        // 🕒 Real-time Timer
         socket.on('timer', (sec) => {
             let m = Math.floor(sec/60);
             let s = sec%60;
             document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            
             if(sec <= 10) {
                 document.querySelectorAll('.num-btn').forEach(btn => btn.disabled = true);
-                document.getElementById('status').innerText = "Betting Closed! Waiting for Result...";
+                document.getElementById('status').innerText = "🔒 Betting Closed!";
+                document.getElementById('status').style.color = "#ff4444";
             } else {
                 document.querySelectorAll('.num-btn').forEach(btn => btn.disabled = false);
+                document.getElementById('status').innerText = "Pick a number 1-100";
+                document.getElementById('status').style.color = "#f2a900";
             }
         });
 
+        // 🏆 Winner Announcement
         socket.on('gameResult', (data) => {
             const overlay = document.getElementById('result-overlay');
-            const winNumDisp = document.getElementById('winning-num-display');
-            const resTitle = document.getElementById('result-title');
-            const resMsg = document.getElementById('result-msg');
-
             overlay.style.display = 'flex';
-            winNumDisp.innerText = data.number;
+            document.getElementById('winning-num-display').innerText = data.number;
 
             if(selectedNum == data.number) {
-                resTitle.innerText = "CHAMPION!";
-                resMsg.innerText = "Congratulations! 100 coins added to your wallet.";
+                document.getElementById('result-title').innerText = "🎉 CHAMPION!";
+                document.getElementById('result-msg').innerText = "Congratulations! You won ₹100";
                 wallet += 100;
                 document.getElementById('wallet-balance').innerText = wallet;
             } else {
-                resTitle.innerText = "LOST!";
-                resMsg.innerText = "Better luck next time, Bhai!";
+                document.getElementById('result-title').innerText = "😞 YOU LOST";
+                document.getElementById('result-msg').innerText = "Better luck next time, Bhai!";
             }
-            selectedNum = null; // Reset for next round
+            selectedNum = null; // Reset
+            document.querySelectorAll('.num-btn').forEach(btn => btn.classList.remove('selected'));
         });
 
         onAuthStateChanged(auth, (user) => {
@@ -128,6 +136,7 @@
                 document.getElementById('login-container').classList.add('hidden');
                 document.getElementById('game-container').classList.remove('hidden');
                 document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-photo').src = user.photoURL;
             } else {
                 document.getElementById('login-container').classList.remove('hidden');
                 document.getElementById('game-container').classList.add('hidden');
